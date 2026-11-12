@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:">
+<title>matamoscas</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400&amp;family=Sora:wght@600;700&amp;display=swap">
+<link rel="stylesheet" href="styles.css">
+<script type="module" src="app.js"></script>
+</head>
+<body>
+
+<!-- Pantalla 1 · Conectar Gmail -->
+<section id="connect-screen" class="connect" hidden>
+  <div class="brand brand--lg">
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2.5" width="14" height="11" rx="2.5"/><path d="M9 2.5v11M15 2.5v11M5 8h14M12 13.5V21.5"/></svg>
+    <span>matamoscas</span>
+  </div>
+  <form id="connect-form" class="card connect__card" novalidate>
+    <div class="stack-8">
+      <h1 class="title">Conecta tu Gmail</h1>
+      <p class="lead">Nada se mueve ni se borra hasta que tú lo confirmes en una regla.</p>
+    </div>
+    <div class="stack-8">
+      <label for="email" class="label">Correo de Gmail</label>
+      <input id="email" class="input" type="email" autocomplete="email" placeholder="tu.nombre@gmail.com" required>
+    </div>
+    <div class="stack-8">
+      <label for="pass" class="label">Contraseña de aplicación</label>
+      <div class="row-8">
+        <input id="pass" class="input input--mono" type="password" autocomplete="off" spellcheck="false" placeholder="xxxx xxxx xxxx xxxx" required>
+        <button id="toggle-pass" type="button" class="icon-btn" aria-label="Mostrar contraseña" aria-pressed="false">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <div class="info">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span>Gmail no acepta tu contraseña normal. Crea una de 16 letras en tu cuenta de Google (necesita la verificación en dos pasos activada). <a href="https://myaccount.google.com/apppasswords" data-external>Cómo crearla</a></span>
+      </div>
+    </div>
+    <p id="connect-error" class="error" role="alert" hidden></p>
+    <button id="connect-btn" type="submit" class="btn-primary">Conectar y ver mis correos</button>
+    <p class="footnote">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+      Conexión cifrada con imap.gmail.com
+    </p>
+  </form>
+</section>
+
+<!-- Pantalla 2 · Bandeja -->
+<section id="inbox-screen" class="inbox" hidden>
+  <header class="topbar">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2.5" width="14" height="11" rx="2.5"/><path d="M9 2.5v11M15 2.5v11M5 8h14M12 13.5V21.5"/></svg>
+      <span>matamoscas</span>
+    </div>
+    <div class="pill">
+      <span class="pill__dot" aria-hidden="true"></span>
+      <span id="account-email"></span>
+      <span class="muted">· Conectado</span>
+    </div>
+    <button id="refresh-btn" type="button" class="btn-secondary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></svg>
+      Actualizar
+    </button>
+    <button id="disconnect-btn" type="button" class="btn-ghost">Desconectar</button>
+  </header>
+  <div class="inbox__body">
+    <aside class="sidebar">
+      <nav id="folders" class="sidebar__group" aria-label="Carpetas"></nav>
+      <nav class="sidebar__group" aria-label="Limpieza">
+        <button id="nav-rules" type="button" class="folder">
+          <span>Reglas</span>
+          <span id="rules-count" class="folder__count"></span>
+        </button>
+        <button id="nav-settings" type="button" class="folder"><span>Ajustes</span></button>
+      </nav>
+    </aside>
+    <main id="mail-view" class="content">
+      <div class="content__head">
+        <div class="content__title">
+          <h1 id="folder-title" class="title">Recibidos</h1>
+          <p id="folder-count" class="muted small"></p>
+        </div>
+        <label for="search" class="sr-only">Buscar correos</label>
+        <input id="search" class="input input--search" type="search" placeholder="Buscar por remitente o asunto">
+      </div>
+      <p id="inbox-error" class="error" role="alert" hidden></p>
+      <section id="extract-panel" class="card extract" aria-live="polite" hidden></section>
+      <div class="card list">
+        <div class="list__bar">
+          <input id="select-all" class="list__check" type="checkbox" aria-label="Seleccionar todos los correos de esta página">
+          <span id="selection-count" class="muted small">Marca correos para sacar reglas de ellos</span>
+          <button id="clear-selection" type="button" class="btn-ghost btn--sm" hidden>Quitar selección</button>
+          <button id="extract-btn" type="button" class="btn-secondary btn--sm list__extract" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/></svg>
+            <span id="extract-label">Extraer reglas de eliminación</span>
+          </button>
+        </div>
+        <div id="messages" aria-live="polite"></div>
+        <nav class="pager" aria-label="Paginación">
+          <span id="page-range" class="muted small"></span>
+          <div class="pager__buttons">
+            <button id="prev-btn" type="button" class="icon-btn icon-btn--sm" aria-label="Página anterior">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <span id="page-label" class="small"></span>
+            <button id="next-btn" type="button" class="icon-btn icon-btn--sm" aria-label="Página siguiente">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
+        </nav>
+      </div>
+    </main>
+
+    <main id="rules-view" class="content content--scroll" hidden>
+      <div class="content__head">
+        <div class="content__title">
+          <h1 class="title">Reglas</h1>
+          <p class="muted small">Di con tus palabras qué correos sobran. Claude lo convierte en un filtro y te enseña qué correos lo cumplen.</p>
+        </div>
+      </div>
+      <div class="info">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span>«Ver correos» solo mira. «Aplicar» te dice cuántos correos tocará y espera a que confirmes. Los destacados e importantes nunca se tocan, y la última pasada se puede deshacer (salvo «Borrar para siempre»).</span>
+      </div>
+      <div id="key-missing" class="info info--action" hidden>
+        <span>Para traducir reglas hace falta tu clave de Anthropic.</span>
+        <button id="go-settings" type="button" class="btn-link">Ir a Ajustes</button>
+      </div>
+      <form id="rule-form" class="card panel" novalidate>
+        <div class="stack-8">
+          <label for="rule-text" class="label">Nueva regla</label>
+          <textarea id="rule-text" class="input textarea" rows="2" maxlength="1000" placeholder="Ej.: las promociones de tiendas de ropa de hace más de un mes"></textarea>
+        </div>
+        <fieldset class="stack-8 fieldset">
+          <legend class="label">Cómo buscarlos</legend>
+          <div id="rule-kind" class="switcher">
+            <label class="switcher__opt">
+              <input type="radio" name="rule-kind" value="filter" checked>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h18l-7 8.5V19l-4 2v-8.5z"/></svg>
+              <span>Filtro <span class="switcher__hint">remitente, asunto…</span></span>
+            </label>
+            <label class="switcher__opt">
+              <input type="radio" name="rule-kind" value="ai">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/></svg>
+              <span>Con IA <span class="switcher__hint">Claude lee cada correo</span></span>
+            </label>
+          </div>
+        </fieldset>
+        <div class="panel__row">
+          <div class="stack-8">
+            <label for="rule-action" class="label">Qué hacer con esos correos</label>
+            <select id="rule-action" class="input select">
+              <option value="trash">A la papelera</option>
+              <option value="spam">Marcar como spam</option>
+              <option value="archive">Archivar</option>
+              <option value="label">Etiquetar</option>
+              <option value="delete">Borrar para siempre</option>
+            </select>
+          </div>
+          <div id="label-field" class="stack-8" hidden>
+            <label for="rule-label" class="label">Etiqueta</label>
+            <input id="rule-label" class="input" maxlength="100" placeholder="Ej.: Promociones">
+          </div>
+        </div>
+        <label id="delete-confirm" class="check" hidden>
+          <input id="delete-ok" type="checkbox">
+          <span>Entiendo que estos correos no pasarán por la papelera y no se podrán recuperar.</span>
+        </label>
+        <p id="rule-error" class="error" role="alert" hidden></p>
+        <button id="rule-btn" type="submit" class="btn-primary">Crear regla</button>
+      </form>
+      <p id="rules-error" class="error" role="alert" hidden></p>
+      <div id="rules" class="stack-16" aria-live="polite"></div>
+      <section id="history-panel" class="card panel" hidden>
+        <h2 class="subtitle">Historial</h2>
+        <p id="history-error" class="error" role="alert" hidden></p>
+        <ul id="history" class="history"></ul>
+      </section>
+    </main>
+
+    <main id="settings-view" class="content content--scroll" hidden>
+      <div class="content__head">
+        <div class="content__title"><h1 class="title">Ajustes</h1></div>
+      </div>
+      <form id="key-form" class="card panel" novalidate>
+        <div class="panel__head">
+          <h2 class="subtitle">Clave de Anthropic</h2>
+          <span id="key-status" class="chip"></span>
+        </div>
+        <p class="muted small">matamoscas usa Claude para entender tus reglas. La clave se guarda cifrada en este ordenador y no se vuelve a mostrar. Escríbela solo aquí, nunca en un chat. <a href="https://console.anthropic.com/settings/keys" data-external>Conseguir una clave</a></p>
+        <div class="row-8">
+          <label for="key-input" class="sr-only">Clave de Anthropic</label>
+          <input id="key-input" class="input input--mono" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-…">
+          <button id="key-save" type="submit" class="btn-secondary">Guardar</button>
+        </div>
+        <p id="key-error" class="error" role="alert" hidden></p>
+        <p id="key-ok" class="success small" role="status" hidden></p>
+        <button id="key-clear" type="button" class="btn-ghost panel__end" hidden>Quitar clave</button>
+      </form>
+    </main>
+  </div>
+</section>
+
+</body>
+</html>

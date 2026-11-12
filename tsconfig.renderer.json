@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "ES2022",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": [],
+    "rootDir": "src",
+    "outDir": "dist/web",
+    "sourceMap": false
+  },
+  "include": ["src/renderer/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

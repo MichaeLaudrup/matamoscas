@@ -1,0 +1,33 @@
+{
+  "name": "matamoscas",
+  "version": "0.1.0",
+  "description": "App de escritorio para eliminar correo basura automáticamente mediante reglas en lenguaje natural (Gmail + Proton Bridge).",
+  "author": "Michaelaudrup",
+  "license": "MIT",
+  "private": true,
+  "main": "dist/main/index.js",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.renderer.json --noEmit",
+    "build:main": "tsc -p tsconfig.main.json",
+    "build:renderer": "tsc -p tsconfig.renderer.json && node scripts/copy-renderer.mjs",
+    "build": "npm run build:main && npm run build:renderer",
+    "start": "npm run build && node scripts/start.mjs",
+    "dev": "node scripts/dev.mjs",
+    "lint": "npm run typecheck"
+  },
+  "devDependencies": {
+    "@types/mailparser": "^3.9.0",
+    "@types/node": "^22.0.0",
+    "electron": "^45.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.124.0",
+    "imapflow": "^2.9.0",
+    "mailparser": "^3.12.2",
+    "zod": "^4.5.4"
+  }
+}
